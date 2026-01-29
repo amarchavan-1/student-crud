@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Management System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Student Management System</h1>
+
+    <div class="form-card">
+        <input type="text" id="name" placeholder="Student Name">
+        <input type="text" id="roll" placeholder="Roll Number">
+        <input type="text" id="dept" placeholder="Department">
+        <button onclick="saveStudent()">Save Student</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Roll</th>
+                <th>Department</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="studentTable"></tbody>
+    </table>
+</div>
+
+<script>
+let editId = null;
+
+function loadStudents() {
+    fetch("/students")
+        .then(res => res.json())
+        .then(data => {
+            const table = document.getElementById("studentTable");
+            table.innerHTML = "";
+            data.forEach(s => {
+                table.innerHTML += `
+                    <tr>
+                        <td>${s.id}</td>
+                        <td>${s.name}</td>
+                        <td>${s.roll}</td>
+                        <td>${s.dept}</td>
+                        <td>
+                            <button class="edit" onclick="editStudent(${s.id}, '${s.name}', '${s.roll}', '${s.dept}')">Edit</button>
+                            <button class="delete" onclick="deleteStudent(${s.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+}
+
+function saveStudent() {
+    const name = document.getElementById("name").value;
+    const roll = document.getElementById("roll").value;
+    const dept = document.getElementById("dept").value;
+
+    const data = { name, roll, dept };
+
+    if (editId) {
+        fetch(`/students/${editId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }).then(() => {
+            editId = null;
+            loadStudents();
+        });
+    } else {
+        fetch("/students", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }).then(loadStudents);
+    }
+
+    document.getElementById("name").value = "";
+    document.getElementById("roll").value = "";
+    document.getElementById("dept").value = "";
+}
+
+function editStudent(id, name, roll, dept) {
+    editId = id;
+    document.getElementById("name").value = name;
+    document.getElementById("roll").value = roll;
+    document.getElementById("dept").value = dept;
+}
+
+function deleteStudent(id) {
+    fetch(`/students/${id}`, { method: "DELETE" })
+        .then(loadStudents);
+}
+
+loadStudents();
+</script>
+
+</body>
+</html>
