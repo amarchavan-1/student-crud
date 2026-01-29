@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_HUB_USER = "amar_chavan_pccoe" 
+        DOCKER_HUB_USER = "amarchavan1" 
         IMAGE_NAME = "student-crud-app"
         DOCKER_HUB_CREDS = 'docker-hub-creds' 
     }
